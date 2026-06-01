@@ -373,6 +373,40 @@
       font-size: 15px;
     }
 
+    .summary-control {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .summary-control label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+    }
+
+    .summary-control select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #08110f;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .summary-control select:focus {
+      border-color: rgba(32, 193, 123, 0.8);
+      box-shadow: 0 0 0 3px rgba(32, 193, 123, 0.12);
+    }
+
+    .summary-control .input {
+      padding: 11px 12px;
+    }
+
     .button-stack {
       display: grid;
       gap: 10px;
@@ -583,12 +617,31 @@
             <div class="stat-card">
               <div class="stat-label">Grand Total</div>
               <div class="stat-value" id="grandTotal">Rs 0</div>
+              <div class="hint" id="discountSummary" style="margin-top:8px;">Discount: Rs 0</div>
             </div>
 
             <div class="stat-card">
               <div class="summary-row"><span>Items</span><strong id="itemCount">0</strong></div>
               <div class="summary-row"><span>Distinct Medicines</span><strong id="distinctCount">0</strong></div>
               <div class="summary-row"><span>Average Rate</span><strong id="averageRate">Rs 0</strong></div>
+              <div class="summary-row"><span>Subtotal</span><strong id="subTotal">Rs 0</strong></div>
+            </div>
+
+            <div class="stat-card">
+              <div class="summary-control">
+                <label for="discountSelect">Discount</label>
+                <select id="discountSelect">
+                  <option value="0">0%</option>
+                  <option value="10">10%</option>
+                  <option value="15">15%</option>
+                  <option value="20">20%</option>
+                </select>
+              </div>
+              <div class="summary-control">
+                <label for="cashReceived">Cash Received</label>
+                <input id="cashReceived" class="input" type="number" min="0" placeholder="Enter cash received" />
+              </div>
+              <div class="summary-row"><span>Change / Due</span><strong id="changeAmount">Rs 0</strong></div>
             </div>
 
             <div class="divider"></div>
@@ -651,7 +704,9 @@
 
     const state = {
       query: "",
-      cart: []
+      cart: [],
+      discountRate: 0,
+      cashReceived: 0
     };
 
     const searchInput = document.getElementById('searchInput');
@@ -663,6 +718,11 @@
     const itemCountEl = document.getElementById('itemCount');
     const distinctCountEl = document.getElementById('distinctCount');
     const averageRateEl = document.getElementById('averageRate');
+    const subTotalEl = document.getElementById('subTotal');
+    const discountSummaryEl = document.getElementById('discountSummary');
+    const discountSelect = document.getElementById('discountSelect');
+    const cashReceivedInput = document.getElementById('cashReceived');
+    const changeAmountEl = document.getElementById('changeAmount');
     const printBtn = document.getElementById('printBtn');
     const clearBtn = document.getElementById('clearBtn');
     const printArea = document.getElementById('printArea');
@@ -714,9 +774,12 @@
 
     function getTotals() {
       const itemCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
-      const grandTotal = state.cart.reduce((sum, item) => sum + item.qty * item.price, 0);
-      const averageRate = itemCount ? grandTotal / itemCount : 0;
-      return { itemCount, grandTotal, averageRate };
+      const subTotal = state.cart.reduce((sum, item) => sum + item.qty * item.price, 0);
+      const discountAmount = subTotal * (state.discountRate / 100);
+      const grandTotal = Math.max(0, subTotal - discountAmount);
+      const averageRate = itemCount ? subTotal / itemCount : 0;
+      const changeAmount = state.cashReceived - grandTotal;
+      return { itemCount, subTotal, discountAmount, grandTotal, averageRate, changeAmount };
     }
 
     function renderMedicineList() {
@@ -757,12 +820,19 @@
     }
 
     function renderCart() {
-      const { itemCount, grandTotal, averageRate } = getTotals();
+      const { itemCount, subTotal, discountAmount, grandTotal, averageRate, changeAmount } = getTotals();
       cartCountBadge.textContent = `${state.cart.length} Items`;
       itemCountEl.textContent = itemCount;
       distinctCountEl.textContent = state.cart.length;
       grandTotalEl.textContent = formatCurrency(grandTotal);
       averageRateEl.textContent = formatCurrency(averageRate);
+      subTotalEl.textContent = formatCurrency(subTotal);
+      discountSummaryEl.textContent = `Discount (${state.discountRate}%): ${formatCurrency(discountAmount)}`;
+      if (state.cashReceived > 0) {
+        changeAmountEl.textContent = changeAmount >= 0 ? `Rs ${changeAmount.toFixed(0)}` : `Due Rs ${Math.abs(changeAmount).toFixed(0)}`;
+      } else {
+        changeAmountEl.textContent = 'Rs 0';
+      }
 
       if (!state.cart.length) {
         cartBody.innerHTML = '<tr><td colspan="5" class="empty-state">No items added yet. Search medicine from left panel and click it to start billing.</td></tr>';
@@ -801,7 +871,7 @@
     }
 
     function buildInvoiceHtml() {
-      const { grandTotal } = getTotals();
+      const { subTotal, discountAmount, grandTotal, changeAmount } = getTotals();
       const now = new Date();
       const dateStr = now.toLocaleDateString('en-PK', { day: '2-digit', month: '2-digit', year: 'numeric' });
       const timeStr = now.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
@@ -839,7 +909,13 @@
               ${rows}
             </tbody>
           </table>
-          <div class="print-total">Grand Total: ${formatCurrency(grandTotal)}</div>
+          <div class="print-total" style="flex-direction:column; gap:6px; align-items:flex-end;">
+            <div>Subtotal: ${formatCurrency(subTotal)}</div>
+            <div>Discount (${state.discountRate}%): ${formatCurrency(discountAmount)}</div>
+            <div>Grand Total: ${formatCurrency(grandTotal)}</div>
+            <div>Cash Received: ${formatCurrency(state.cashReceived)}</div>
+            <div>${changeAmount >= 0 ? 'Change' : 'Due'}: ${formatCurrency(Math.abs(changeAmount))}</div>
+          </div>
           <div class="print-footer">Thank you for visiting. Please keep the receipt for record.</div>
         </div>
       `;
@@ -859,8 +935,20 @@
       const confirmed = confirm('Clear the current bill?');
       if (!confirmed) return;
       state.cart = [];
+      state.discountRate = Number(discountSelect.value) || 0;
+      state.cashReceived = Number(cashReceivedInput.value) || 0;
       renderCart();
     }
+
+    discountSelect.addEventListener('change', event => {
+      state.discountRate = Number(event.target.value) || 0;
+      renderCart();
+    });
+
+    cashReceivedInput.addEventListener('input', event => {
+      state.cashReceived = Number(event.target.value) || 0;
+      renderCart();
+    });
 
     searchInput.addEventListener('input', event => {
       state.query = event.target.value;
@@ -885,6 +973,8 @@
       }
     });
 
+    state.discountRate = Number(discountSelect.value) || 0;
+    state.cashReceived = Number(cashReceivedInput.value) || 0;
     renderMedicineList();
     renderCart();
   </script>
