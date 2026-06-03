@@ -1,804 +1,883 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pharmacy POS - Daniyal Pharmacy ERP & POS</title>
-  <style>
-    :root {
-      --bg: #07110f;
-      --panel: #0d1815;
-      --panel-2: #11211c;
-      --panel-3: #152a23;
-      --line: #224337;
-      --line-soft: #1a342b;
-      --text: #e9fff5;
-      --muted: #92b7a8;
-      --accent: #20c17b;
-      --accent-2: #14a56a;
-      --warn: #ffbe55;
-      --danger: #ff6b6b;
-      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --font: "Segoe UI", Tahoma, Arial, sans-serif;
-      --mono: "Consolas", "Courier New", monospace;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      height: 100%;
-    }
-
-    body {
-      margin: 0;
-      font-family: var(--font);
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(32, 193, 123, 0.16), transparent 26%),
-        radial-gradient(circle at top right, rgba(20, 165, 106, 0.12), transparent 22%),
-        linear-gradient(180deg, #081210 0%, #06100d 100%);
-      overflow: hidden;
-    }
-
-    .app {
-      height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, #0e1916 0%, #0a1512 100%);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
-    }
-
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 20px;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-    }
-
-    .brand .sub {
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: 0.3px;
-    }
-
-    .status-bar {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(32, 193, 123, 0.12);
-    }
-
-    .workspace {
-      display: grid;
-      grid-template-columns: 280px minmax(0, 1fr) 340px;
-      gap: 12px;
-      padding: 12px;
-      min-height: 0;
-    }
-
-    .panel {
-      background: linear-gradient(180deg, rgba(17, 33, 28, 0.98), rgba(11, 22, 19, 0.98));
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      min-height: 0;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .panel-header {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--line-soft);
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .panel-title {
-      margin: 0;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-
-    .panel-body {
-      padding: 12px;
-      min-height: 0;
-      overflow: auto;
-    }
-
-    .search-wrap {
-      display: grid;
-      gap: 10px;
-    }
-
-    .input {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: #08110f;
-      color: var(--text);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .input:focus {
-      border-color: rgba(32, 193, 123, 0.8);
-      box-shadow: 0 0 0 3px rgba(32, 193, 123, 0.12);
-    }
-
-    .hint {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.5;
-    }
-
-    .medicine-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .medicine-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      border: 1px solid var(--line-soft);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      user-select: none;
-      transition: border-color 0.12s ease, background 0.12s ease;
-    }
-
-    .medicine-item:hover {
-      border-color: rgba(32, 193, 123, 0.65);
-      background: rgba(32, 193, 123, 0.08);
-    }
-
-    .medicine-name {
-      font-size: 13px;
-      font-weight: 600;
-      line-height: 1.25;
-    }
-
-    .medicine-meta {
-      text-align: right;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: #bce7d5;
-      min-width: 70px;
-    }
-
-    .medicine-meta small {
-      display: block;
-      color: var(--muted);
-      font-family: var(--font);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      margin-bottom: 2px;
-    }
-
-    .cart-wrap {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .cart-table-wrap {
-      min-height: 0;
-      overflow: auto;
-      flex: 1;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    .cart-table thead th {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: #0f1e19;
-      color: #d8fff0;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--line);
-      padding: 10px 8px;
-      text-align: left;
-    }
-
-    .cart-table tbody td {
-      border-bottom: 1px solid rgba(34, 67, 55, 0.7);
-      padding: 8px;
-      font-size: 13px;
-      vertical-align: middle;
-    }
-
-    .cart-table tbody tr:hover {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .col-name { width: 42%; }
-    .col-qty { width: 14%; }
-    .col-price { width: 16%; }
-    .col-total { width: 16%; }
-    .col-action { width: 12%; }
-
-    .qty-input {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: #07100e;
-      color: var(--text);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px;
-      text-align: center;
-      font-family: var(--mono);
-      outline: none;
-    }
-
-    .qty-input:focus {
-      border-color: rgba(32, 193, 123, 0.8);
-      box-shadow: 0 0 0 2px rgba(32, 193, 123, 0.12);
-    }
-
-    .money {
-      font-family: var(--mono);
-      font-weight: 700;
-      color: #dfffee;
-    }
-
-    .action-btn {
-      border: 0;
-      border-radius: 8px;
-      padding: 9px 7px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.08s ease, opacity 0.08s ease, background 0.12s ease;
-      color: white;
-      width: 100%;
-    }
-
-    .action-btn:active {
-      transform: translateY(1px);
-    }
-
-    .btn-danger {
-      background: linear-gradient(180deg, #ff7373, #e94e4e);
-    }
-
-    .btn-primary {
-      background: linear-gradient(180deg, var(--accent), var(--accent-2));
-    }
-
-    .btn-secondary {
-      background: linear-gradient(180deg, #385a4b, #284236);
-      border: 1px solid var(--line);
-    }
-
-    .totals-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .stat-card {
-      border: 1px solid var(--line-soft);
-      border-radius: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
-      padding: 12px;
-    }
-
-    .stat-label {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 11px;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 800;
-      line-height: 1;
-      font-family: var(--mono);
-    }
-
-    .divider {
-      height: 1px;
-      background: var(--line-soft);
-      margin: 12px 0;
-    }
-
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 0;
-      color: #d9f6ea;
-      font-size: 13px;
-    }
-
-    .summary-row strong {
-      font-family: var(--mono);
-      font-size: 15px;
-    }
-
-    .summary-control {
-      display: grid;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .summary-control label {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 11px;
-    }
-
-    .summary-control select {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: #08110f;
-      color: var(--text);
-      border-radius: 10px;
-      padding: 11px 12px;
-      font-size: 14px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .summary-control select:focus {
-      border-color: rgba(32, 193, 123, 0.8);
-      box-shadow: 0 0 0 3px rgba(32, 193, 123, 0.12);
-    }
-
-    .summary-control .input {
-      padding: 11px 12px;
-    }
-
-    .button-stack {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .footer-note {
-      margin-top: 12px;
-      font-size: 11px;
-      line-height: 1.5;
-      color: var(--muted);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 5px 10px;
-      color: #c3e9db;
-      font-size: 11px;
-      background: rgba(255,255,255,0.02);
-    }
-
-    .empty-state {
-      padding: 30px 16px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .kbd {
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 2px 6px;
-      border: 1px solid var(--line);
-      border-bottom-color: #13261f;
-      border-radius: 6px;
-      color: #d9f6ea;
-      background: #08120f;
-    }
-
-    .right-actions {
-      display: grid;
-      gap: 10px;
-    }
-
-    /* Print invoice */
-    #printArea {
-      display: none;
-    }
-
-    @media print {
-      body {
-        overflow: visible;
-        background: white;
-        color: black;
-      }
-
-      .app {
-        display: none;
-      }
-
-      #printArea {
-        display: block;
-        padding: 16px;
-        font-family: Arial, sans-serif;
-        color: #111;
-      }
-
-      .invoice {
-        width: 100%;
-        max-width: 820px;
-        margin: 0 auto;
-      }
-
-      .invoice-header {
-        text-align: center;
-        border-bottom: 2px solid #111;
-        padding-bottom: 10px;
-        margin-bottom: 14px;
-      }
-
-      .invoice-header h2 {
-        margin: 0 0 4px;
-        font-size: 22px;
-      }
-
-      .invoice-header p {
-        margin: 3px 0;
-        font-size: 12px;
-      }
-
-      .invoice-meta {   
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        font-size: 12px;
-      }
-
-      .invoice-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      .invoice-table th,
-      .invoice-table td {
-        border: 1px solid #333;
-        padding: 8px 7px;
-        font-size: 12px;
-        text-align: left;
-      }
-
-      .invoice-table th {
-        background: #efefef;
-      }
-
-      .print-total {
-        margin-top: 12px;
-        display: flex;
-        justify-content: flex-end;
-        font-size: 15px;
-        font-weight: 700;
-      }
-
-      .print-footer {
-        margin-top: 24px;
-        text-align: center;
-        font-size: 11px;
-      }
-    }
-
-    @media (max-width: 1200px) {
-      body { overflow: auto; }
-      .app { height: auto; min-height: 100vh; }
-      .workspace {
-        grid-template-columns: 1fr;
-      }
-      .panel {
-        min-height: 360px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pharmacy POS - Daniyal Pharmacy ERP & POS</title>
+    <style>
+        :root {
+            --bg: #07110f;
+            --panel: #0d1815;
+            --panel-2: #11211c;
+            --panel-3: #152a23;
+            --line: #224337;
+            --line-soft: #1a342b;
+            --text: #e9fff5;
+            --muted: #92b7a8;
+            --accent: #20c17b;
+            --accent-2: #14a56a;
+            --warn: #ffbe55;
+            --danger: #ff6b6b;
+            --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --font: "Segoe UI", Tahoma, Arial, sans-serif;
+            --mono: "Consolas", "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font);
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(32, 193, 123, 0.16), transparent 26%),
+                radial-gradient(circle at top right, rgba(20, 165, 106, 0.12), transparent 22%),
+                linear-gradient(180deg, #081210 0%, #06100d 100%);
+            overflow: hidden;
+        }
+
+        .app {
+            height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, #0e1916 0%, #0a1512 100%);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .brand .sub {
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(32, 193, 123, 0.12);
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr) 340px;
+            gap: 12px;
+            padding: 12px;
+            min-height: 0;
+        }
+
+        .panel {
+            background: linear-gradient(180deg, rgba(17, 33, 28, 0.98), rgba(11, 22, 19, 0.98));
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            min-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line-soft);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .panel-body {
+            padding: 12px;
+            min-height: 0;
+            overflow: auto;
+        }
+
+        .search-wrap {
+            display: grid;
+            gap: 10px;
+        }
+
+        .input {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: #08110f;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input:focus {
+            border-color: rgba(32, 193, 123, 0.8);
+            box-shadow: 0 0 0 3px rgba(32, 193, 123, 0.12);
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .medicine-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .medicine-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border: 1px solid var(--line-soft);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color 0.12s ease, background 0.12s ease;
+        }
+
+        .medicine-item:hover {
+            border-color: rgba(32, 193, 123, 0.65);
+            background: rgba(32, 193, 123, 0.08);
+        }
+
+        .medicine-name {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .medicine-meta {
+            text-align: right;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: #bce7d5;
+            min-width: 70px;
+        }
+
+        .medicine-meta small {
+            display: block;
+            color: var(--muted);
+            font-family: var(--font);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+
+        .cart-wrap {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            margin-top: 20px;
+        }
+
+        .cart-table-wrap {
+            min-height: 0;
+            overflow: auto;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .cart-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #0f1e19;
+            color: #d8fff0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--line);
+            padding: 10px 8px;
+            text-align: left;
+        }
+
+        .cart-table tbody td {
+            border-bottom: 1px solid rgba(34, 67, 55, 0.7);
+            padding: 8px;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .cart-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .col-name {
+            width: 42%;
+        }
+
+        .col-qty {
+            width: 14%;
+        }
+
+        .col-price {
+            width: 16%;
+        }
+
+        .col-total {
+            width: 16%;
+        }
+
+        .col-action {
+            width: 12%;
+        }
+
+        .qty-input {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: #07100e;
+            color: var(--text);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+            text-align: center;
+            font-family: var(--mono);
+            outline: none;
+        }
+
+        .qty-input:focus {
+            border-color: rgba(32, 193, 123, 0.8);
+            box-shadow: 0 0 0 2px rgba(32, 193, 123, 0.12);
+        }
+
+        .money {
+            font-family: var(--mono);
+            font-weight: 700;
+            color: #dfffee;
+        }
+
+        .action-btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 9px 7px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.08s ease, opacity 0.08s ease, background 0.12s ease;
+            color: white;
+            width: 100%;
+        }
+
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(180deg, #ff7373, #e94e4e);
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #385a4b, #284236);
+            border: 1px solid var(--line);
+        }
+
+        .totals-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .stat-card {
+            border: 1px solid var(--line-soft);
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+            padding: 12px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1;
+            font-family: var(--mono);
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--line-soft);
+            margin: 12px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            color: #d9f6ea;
+            font-size: 13px;
+        }
+
+        .summary-row strong {
+            font-family: var(--mono);
+            font-size: 15px;
+        }
+
+        .summary-control {
+            display: grid;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .summary-control label {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+        }
+
+        .summary-control select {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: #08110f;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 11px 12px;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .summary-control select:focus {
+            border-color: rgba(32, 193, 123, 0.8);
+            box-shadow: 0 0 0 3px rgba(32, 193, 123, 0.12);
+        }
+
+        .summary-control .input {
+            padding: 11px 12px;
+        }
+
+        .button-stack {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .footer-note {
+            margin-top: 12px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 5px 10px;
+            color: #c3e9db;
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .empty-state {
+            padding: 30px 16px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .kbd {
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 2px 6px;
+            border: 1px solid var(--line);
+            border-bottom-color: #13261f;
+            border-radius: 6px;
+            color: #d9f6ea;
+            background: #08120f;
+        }
+
+        .right-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        /* Print invoice */
+        #printArea {
+            display: none;
+        }
+
+        @media print {
+            body {
+                overflow: visible;
+                background: white;
+                color: black;
+            }
+
+            .app {
+                display: none;
+            }
+
+            #printArea {
+                display: block;
+                padding: 16px;
+                font-family: Arial, sans-serif;
+                color: #111;
+            }
+
+            .invoice {
+                width: 100%;
+                max-width: 820px;
+                margin: 0 auto;
+            }
+
+            .invoice-header {
+                text-align: center;
+                border-bottom: 2px solid #111;
+                padding-bottom: 10px;
+                margin-bottom: 14px;
+            }
+
+            .invoice-header h2 {
+                margin: 0 0 4px;
+                font-size: 22px;
+            }
+
+            .invoice-header p {
+                margin: 3px 0;
+                font-size: 12px;
+            }
+
+            .invoice-meta {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 12px;
+                font-size: 12px;
+            }
+
+            .invoice-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .invoice-table th,
+            .invoice-table td {
+                border: 1px solid #333;
+                padding: 8px 7px;
+                font-size: 12px;
+                text-align: left;
+            }
+
+            .invoice-table th {
+                background: #efefef;
+            }
+
+            .print-total {
+                margin-top: 12px;
+                display: flex;
+                justify-content: flex-end;
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+            .print-footer {
+                margin-top: 24px;
+                text-align: center;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                overflow: auto;
+            }
+
+            .app {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                min-height: 360px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <h1>Daniyal Pharmacy POS</h1>
-        <div class="sub">Medical Store Billing System | Desktop POS Style | Pakistan</div>
-      </div>
-      <div class="status-bar">
-        <span class="status-pill"><span class="status-dot"></span> LIVE BILLING MODE</span>
-        <span class="badge">F2 Search</span>
-        <span class="badge">F9 Print</span>
-        <span class="badge">Ctrl+L Clear</span>
-      </div>
-    </header>
-
-    <main class="workspace">
-      <section class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Medicine Search</h2>
-          <span class="badge" id="medicineCountBadge">0 Items</span>
-        </div>
-        <div class="panel-body">
-          <div class="search-wrap">
-            <input id="searchInput" class="input" type="text" placeholder="Search medicine name..." autocomplete="off" />
-            <div class="hint">Type medicine name and click to add. If item is already in cart, quantity increases automatically.</div>
-          </div>
-          <div class="medicine-list" id="medicineList"></div>
-        </div>
-      </section>
-      
-
-      <section class="panel cart-wrap">
-        <div class="panel-header">
-          <h2 class="panel-title">Billing Cart</h2>
-          <span class="badge" id="cartCountBadge">0 Items</span>
-        </div>
-        <div class="cart-table-wrap">
-          <table class="cart-table">
-            <thead>
-              <tr>
-                <th class="col-name">Medicine</th>
-                <th class="col-qty">Qty</th>
-                <th class="col-price">Rate</th>
-                <th class="col-total">Total</th>
-                <th class="col-action">Action</th>
-              </tr>
-            </thead>
-            <tbody id="cartBody">
-              <tr>
-                <td colspan="5" class="empty-state">No items added yet. Search medicine from left panel and click it to start billing.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Bill Summary</h2>
-          <span class="badge">Cash Counter</span>
-        </div>
-        <div class="panel-body">
-          <div class="totals-grid">
-            <div class="stat-card">
-              <div class="stat-label">Grand Total</div>
-              <div class="stat-value" id="grandTotal">Rs 0</div>
-              <div class="hint" id="discountSummary" style="margin-top:8px;">Discount: Rs 0</div>
+    <div class="app">
+        <header class="topbar">
+            <div class="brand">
+                <h1>Daniyal Pharmacy POS</h1>
+                <div class="sub">Medical Store Billing System | Desktop POS Style | Pakistan</div>
             </div>
-
-            <div class="stat-card">
-              <div class="summary-row"><span>Items</span><strong id="itemCount">0</strong></div>
-              <div class="summary-row"><span>Distinct Medicines</span><strong id="distinctCount">0</strong></div>
-              <div class="summary-row"><span>Average Rate</span><strong id="averageRate">Rs 0</strong></div>
-              <div class="summary-row"><span>Subtotal</span><strong id="subTotal">Rs 0</strong></div>
+            <div class="status-bar">
+                <span class="status-pill"><span class="status-dot"></span> LIVE BILLING MODE</span>
+                <span class="badge">F2 Search</span>
+                <span class="badge">F9 Print</span>
+                <span class="badge">Ctrl+L Clear</span>
             </div>
+        </header>
 
-            <div class="stat-card">
-              <div class="summary-control">
-                <label for="discountSelect">Discount</label>
-                <select id="discountSelect">
-                  <option value="0">0%</option>
-                  <option value="10">10%</option>
-                  <option value="15">15%</option>
-                  <option value="20">20%</option>
-                </select>
-              </div>
-              <div class="summary-control">
-                <label for="cashReceived">Cash Received</label>
-                <input id="cashReceived" class="input" type="number" min="0" placeholder="Enter cash received" />
-              </div>
-              <div class="summary-row"><span>Change / Due</span><strong id="changeAmount">Rs 0</strong></div>
-            </div>
+        <main class="workspace">
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Medicine Search</h2>
+                    <span class="badge" id="medicineCountBadge">0 Items</span>
+                </div>
+                <div class="panel-body">
+                    <div class="search-wrap">
+                        <input id="searchInput" class="input" type="text" placeholder="Search medicine name..."
+                            autocomplete="off" />
+                        <div class="hint">Type medicine name and click to add. If item is already in cart, quantity
+                            increases automatically.</div>
+                    </div>
+                    <div class="medicine-list" id="medicineList"></div>
+                </div>
+            </section>
 
-            <div class="divider"></div>
+            <section>
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Add Medicine</h2>
+                        <span class="badge">Inventory</span>
+                    </div>
 
-            <div class="button-stack right-actions">
-              <button class="action-btn btn-primary" id="printBtn">Print Bill</button>
-              <button class="action-btn btn-secondary" id="clearBtn">Clear Cart</button>
-            </div>
+                    <div class="panel-body">
+                        <div style="display:grid; gap:10px;">
+                            <div style="display:grid; grid-template-columns:1fr 150px; gap:10px; align-items:end;">
 
-            <div class="footer-note">
-                <span></span>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+                                <div>
+                                    <label for="newMedicineName"
+                                        style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.4px; display:block; margin-bottom:4px;">
+                                        Medicine Name
+                                    </label>
+                                    <input id="newMedicineName" class="input" type="text" placeholder="Medicine Name">
+                                </div>
 
-  <div id="printArea"></div>
+                                <div>
+                                    <label for="newMedicinePrice"
+                                        style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.4px; display:block; margin-bottom:4px;">
+                                        Price
+                                    </label>
+                                    <input id="newMedicinePrice" class="input" type="number" placeholder="Price">
+                                </div>
 
-  <script>
-    const medicines = [
-      { name: "Panadol 500mg", price: 8 },
-      { name: "Brufen 200mg", price: 12 },
-      { name: "Augmentin 625mg", price: 85 },
-      { name: "Flagyl 400mg", price: 18 },
-      { name: "Disprin Tablets", price: 4 },
-      { name: "Septran DS", price: 22 },
-      { name: "Ciprofloxacin 500mg", price: 20 },
-      { name: "Arinac Forte", price: 16 },
-      { name: "Panadol Extra", price: 10 },
-      { name: "Risek 20mg", price: 35 },
-      { name: "Losec 20mg", price: 42 },
-      { name: "Zinc Sulphate Syrup", price: 55 },
-      { name: "ORS Sachet", price: 20 },
-      { name: "Nuberol Forte", price: 14 },
-      { name: "Avil Tablet", price: 6 },
-      { name: "Ponstan 500mg", price: 24 },
-      { name: "Metformin 500mg", price: 15 },
-      { name: "Glucofine 850mg", price: 30 },
-      { name: "Calpol 250mg", price: 11 },
-      { name: "Hydrocortisone Cream", price: 48 },
-      { name: "Betnovate Cream", price: 72 },
-      { name: "Neurobion Forte", price: 27 },
-      { name: "Syp. Rigix", price: 60 },
-      { name: "Syp. Histal", price: 65 },
-      { name: "Loratadine 10mg", price: 7 },
-      { name: "Aspirin 75mg", price: 5 },
-      { name: "Bruton Syrup", price: 52 },
-      { name: "Mucaine Gel", price: 33 },
-      { name: "Strepsils", price: 25 },
-      { name: "ORS Plus", price: 22 }
-    ].map((medicine, index) => ({
-      ...medicine,
-      id: index + 1,
-      batch: `B-${String(index + 101)}`,
-      expiry: `12/${2026 + (index % 4)}`,
-      stock: 100 + index * 7
-    }));
+                            </div>
 
-    const state = {
-      query: "",
-      cart: [],
-      discountRate: 0,
-      cashReceived: 0
-    };
+                            <button id="addMedicineBtn" class="action-btn btn-primary" style="margin-top:10px;">
+                                Add Medicine
+                            </button>
+                        </div>
+                    </div>
+                </section>
 
-    const searchInput = document.getElementById('searchInput');
-    const medicineList = document.getElementById('medicineList');
-    const medicineCountBadge = document.getElementById('medicineCountBadge');
-    const cartBody = document.getElementById('cartBody');
-    const cartCountBadge = document.getElementById('cartCountBadge');
-    const grandTotalEl = document.getElementById('grandTotal');
-    const itemCountEl = document.getElementById('itemCount');
-    const distinctCountEl = document.getElementById('distinctCount');
-    const averageRateEl = document.getElementById('averageRate');
-    const subTotalEl = document.getElementById('subTotal');
-    const discountSummaryEl = document.getElementById('discountSummary');
-    const discountSelect = document.getElementById('discountSelect');
-    const cashReceivedInput = document.getElementById('cashReceived');
-    const changeAmountEl = document.getElementById('changeAmount');
-    const printBtn = document.getElementById('printBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const printArea = document.getElementById('printArea');
+                <section class="panel cart-wrap">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Billing Cart</h2>
+                        <span class="badge" id="cartCountBadge">0 Items</span>
+                    </div>
+                    <div class="cart-table-wrap">
+                        <table class="cart-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-name">Medicine</th>
+                                    <th class="col-qty">Qty</th>
+                                    <th class="col-price">Rate</th>
+                                    <th class="col-total">Total</th>
+                                    <th class="col-action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartBody">
+                                <tr>
+                                    <td colspan="5" class="empty-state">No items added yet. Search medicine from left
+                                        panel
+                                        and click it to start billing.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
 
-    function formatCurrency(amount) {
-      return `Rs ${amount.toFixed(0)}`;
-    }
+            <section class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Bill Summary</h2>
+                    <span class="badge">Cash Counter</span>
+                </div>
+                <div class="panel-body">
+                    <div class="totals-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Grand Total</div>
+                            <div class="stat-value" id="grandTotal">Rs 0</div>
+                            <div class="hint" id="discountSummary" style="margin-top:8px;">Discount: Rs 0</div>
+                        </div>
 
-    function filteredMedicines() {
-      const query = state.query.trim().toLowerCase();
-      if (!query) return medicines;
-      return medicines.filter(medicine => medicine.name.toLowerCase().includes(query));
-    }
+                        <div class="stat-card">
+                            <div class="summary-row"><span>Items</span><strong id="itemCount">0</strong></div>
+                            <div class="summary-row"><span>Distinct Medicines</span><strong
+                                    id="distinctCount">0</strong></div>
+                            <div class="summary-row"><span>Average Rate</span><strong id="averageRate">Rs 0</strong>
+                            </div>
+                            <div class="summary-row"><span>Subtotal</span><strong id="subTotal">Rs 0</strong></div>
+                        </div>
 
-    function addMedicineToCart(medicine) {
-      const existing = state.cart.find(item => item.id === medicine.id);
-      if (existing) {
-        existing.qty += 1;
-      } else {
-        state.cart.push({
-          id: medicine.id,
-          name: medicine.name,
-          price: medicine.price,
-          qty: 1,
-          batch: medicine.batch,
-          expiry: medicine.expiry,
-          stock: medicine.stock
-        });
-      }
-      renderCart();
-    }
+                        <div class="stat-card">
+                            <div class="summary-control">
+                                <label for="discountSelect">Discount</label>
+                                <select id="discountSelect">
+                                    <option value="0">0%</option>
+                                    <option value="10">10%</option>
+                                    <option value="15">15%</option>
+                                    <option value="20">20%</option>
+                                </select>
+                            </div>
+                            <div class="summary-control">
+                                <label for="cashReceived">Cash Received</label>
+                                <input id="cashReceived" class="input" type="number" min="0"
+                                    placeholder="Enter cash received" />
+                            </div>
+                            <div class="summary-row"><span>Change / Due</span><strong id="changeAmount">Rs 0</strong>
+                            </div>
+                        </div>
 
-    function removeFromCart(id) {
-      state.cart = state.cart.filter(item => item.id !== id);
-      renderCart();
-    }
+                        <div class="divider"></div>
 
-    function updateQuantity(id, quantity) {
-      const item = state.cart.find(entry => entry.id === id);
-      if (!item) return;
-      const parsed = parseInt(quantity, 10);
-      if (!Number.isFinite(parsed) || parsed <= 0) {
-        removeFromCart(id);
-        return;
-      }
-      item.qty = parsed;
-      renderCart();
-    }
+                        <div class="button-stack right-actions">
+                            <button class="action-btn btn-primary" id="printBtn">Print Bill</button>
+                            <button class="action-btn btn-secondary" id="clearBtn">Clear Cart</button>
+                        </div>
 
-    function getTotals() {
-      const itemCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
-      const subTotal = state.cart.reduce((sum, item) => sum + item.qty * item.price, 0);
-      const discountAmount = subTotal * (state.discountRate / 100);
-      const grandTotal = Math.max(0, subTotal - discountAmount);
-      const averageRate = itemCount ? subTotal / itemCount : 0;
-      const changeAmount = state.cashReceived - grandTotal;
-      return { itemCount, subTotal, discountAmount, grandTotal, averageRate, changeAmount };
-    }
+                        <div class="footer-note">
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
-    function renderMedicineList() {
-      const list = filteredMedicines();
-      medicineCountBadge.textContent = `${list.length} Items`;
-      medicineList.innerHTML = '';
+    <div id="printArea"></div>
 
-      if (!list.length) {
-        medicineList.innerHTML = '<div class="empty-state">No medicine matched your search.</div>';
-        return;
-      }
+    <script>
+        const medicines = [
+            { name: "Panadol 500mg", price: 8 },
+            { name: "Brufen 200mg", price: 12 },
+            { name: "Augmentin 625mg", price: 85 },
+            { name: "Flagyl 400mg", price: 18 },
+            { name: "Disprin Tablets", price: 4 },
+            { name: "Septran DS", price: 22 },
+            { name: "Ciprofloxacin 500mg", price: 20 },
+            { name: "Arinac Forte", price: 16 },
+            { name: "Panadol Extra", price: 10 },
+            { name: "Risek 20mg", price: 35 },
+            { name: "Losec 20mg", price: 42 },
+            { name: "Zinc Sulphate Syrup", price: 55 },
+            { name: "ORS Sachet", price: 20 },
+            { name: "Nuberol Forte", price: 14 },
+            { name: "Avil Tablet", price: 6 },
+            { name: "Ponstan 500mg", price: 24 },
+            { name: "Metformin 500mg", price: 15 },
+            { name: "Glucofine 850mg", price: 30 },
+            { name: "Calpol 250mg", price: 11 },
+            { name: "Hydrocortisone Cream", price: 48 },
+            { name: "Betnovate Cream", price: 72 },
+            { name: "Neurobion Forte", price: 27 },
+            { name: "Syp. Rigix", price: 60 },
+            { name: "Syp. Histal", price: 65 },
+            { name: "Loratadine 10mg", price: 7 },
+            { name: "Aspirin 75mg", price: 5 },
+            { name: "Bruton Syrup", price: 52 },
+            { name: "Mucaine Gel", price: 33 },
+            { name: "Strepsils", price: 25 },
+            { name: "ORS Plus", price: 22 }
+        ].map((medicine, index) => ({
+            ...medicine,
+            id: index + 1,
+            batch: `B-${String(index + 101)}`,
+            expiry: `12/${2026 + (index % 4)}`,
+            stock: 100 + index * 7
+        }));
 
-      const fragment = document.createDocumentFragment();
-      list.forEach(medicine => {
-        const item = document.createElement('div');
-        item.className = 'medicine-item';
-        item.tabIndex = 0;
-        item.innerHTML = `
+        const savedMedicines = JSON.parse(localStorage.getItem('medicines'));
+
+        if (savedMedicines) {
+            medicines.push(...savedMedicines);
+        }
+
+        const state = {
+            query: "",
+            cart: [],
+            discountRate: 0,
+            cashReceived: 0
+        };
+
+        const searchInput = document.getElementById('searchInput');
+        const medicineList = document.getElementById('medicineList');
+        const medicineCountBadge = document.getElementById('medicineCountBadge');
+        const cartBody = document.getElementById('cartBody');
+        const cartCountBadge = document.getElementById('cartCountBadge');
+        const grandTotalEl = document.getElementById('grandTotal');
+        const itemCountEl = document.getElementById('itemCount');
+        const distinctCountEl = document.getElementById('distinctCount');
+        const averageRateEl = document.getElementById('averageRate');
+        const subTotalEl = document.getElementById('subTotal');
+        const discountSummaryEl = document.getElementById('discountSummary');
+        const discountSelect = document.getElementById('discountSelect');
+        const cashReceivedInput = document.getElementById('cashReceived');
+        const changeAmountEl = document.getElementById('changeAmount');
+        const printBtn = document.getElementById('printBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const printArea = document.getElementById('printArea');
+        const newMedicineName = document.getElementById('newMedicineName');
+        const newMedicinePrice = document.getElementById('newMedicinePrice');
+        const addMedicineBtn = document.getElementById('addMedicineBtn');
+
+        function formatCurrency(amount) {
+            return `Rs ${amount.toFixed(0)}`;
+        }
+
+        function filteredMedicines() {
+            const query = state.query.trim().toLowerCase();
+            if (!query) return medicines;
+            return medicines.filter(medicine => medicine.name.toLowerCase().includes(query));
+        }
+
+        function addMedicineToCart(medicine) {
+            const existing = state.cart.find(item => item.id === medicine.id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                state.cart.push({
+                    id: medicine.id,
+                    name: medicine.name,
+                    price: medicine.price,
+                    qty: 1,
+                    batch: medicine.batch,
+                    expiry: medicine.expiry,
+                    stock: medicine.stock
+                });
+            }
+            renderCart();
+        }
+
+        function removeFromCart(id) {
+            state.cart = state.cart.filter(item => item.id !== id);
+            renderCart();
+        }
+
+        function updateQuantity(id, quantity) {
+            const item = state.cart.find(entry => entry.id === id);
+            if (!item) return;
+            const parsed = parseInt(quantity, 10);
+            if (!Number.isFinite(parsed) || parsed <= 0) {
+                removeFromCart(id);
+                return;
+            }
+            item.qty = parsed;
+            renderCart();
+        }
+
+        function getTotals() {
+            const itemCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
+            const subTotal = state.cart.reduce((sum, item) => sum + item.qty * item.price, 0);
+            const discountAmount = subTotal * (state.discountRate / 100);
+            const grandTotal = Math.max(0, subTotal - discountAmount);
+            const averageRate = itemCount ? subTotal / itemCount : 0;
+            const changeAmount = state.cashReceived - grandTotal;
+            return { itemCount, subTotal, discountAmount, grandTotal, averageRate, changeAmount };
+        }
+
+        function renderMedicineList() {
+            const list = filteredMedicines();
+            medicineCountBadge.textContent = `${list.length} Items`;
+            medicineList.innerHTML = '';
+
+            if (!list.length) {
+                medicineList.innerHTML = '<div class="empty-state">No medicine matched your search.</div>';
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            list.forEach(medicine => {
+                const item = document.createElement('div');
+                item.className = 'medicine-item';
+                item.tabIndex = 0;
+                item.innerHTML = `
           <div>
             <div class="medicine-name">${medicine.name}</div>
           </div>
@@ -807,40 +886,79 @@
             Rs ${medicine.price}
           </div>
         `;
-        item.addEventListener('click', () => addMedicineToCart(medicine));
-        item.addEventListener('keydown', event => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            addMedicineToCart(medicine);
-          }
-        });
-        fragment.appendChild(item);
-      });
+                item.addEventListener('click', () => addMedicineToCart(medicine));
+                item.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        addMedicineToCart(medicine);
+                    }
+                });
+                fragment.appendChild(item);
+            });
 
-      medicineList.appendChild(fragment);
-    }
+            medicineList.appendChild(fragment);
+        }
 
-    function renderCart() {
-      const { itemCount, subTotal, discountAmount, grandTotal, averageRate, changeAmount } = getTotals();
-      cartCountBadge.textContent = `${state.cart.length} Items`;
-      itemCountEl.textContent = itemCount;
-      distinctCountEl.textContent = state.cart.length;
-      grandTotalEl.textContent = formatCurrency(grandTotal);
-      averageRateEl.textContent = formatCurrency(averageRate);
-      subTotalEl.textContent = formatCurrency(subTotal);
-      discountSummaryEl.textContent = `Discount (${state.discountRate}%): ${formatCurrency(discountAmount)}`;
-      if (state.cashReceived > 0) {
-        changeAmountEl.textContent = changeAmount >= 0 ? `Rs ${changeAmount.toFixed(0)}` : `Due Rs ${Math.abs(changeAmount).toFixed(0)}`;
-      } else {
-        changeAmountEl.textContent = 'Rs 0';
-      }
+        function addNewMedicine() {
 
-      if (!state.cart.length) {
-        cartBody.innerHTML = '<tr><td colspan="5" class="empty-state">No items added yet. Search medicine from left panel and click it to start billing.</td></tr>';
-        return;
-      }
+            const name = newMedicineName.value.trim();
+            const price = Number(newMedicinePrice.value);
 
-      cartBody.innerHTML = state.cart.map(item => `
+            if (!name || price <= 0) {
+                alert("Enter medicine name and price");
+                return;
+            }
+
+            const medicine = {
+                id: Date.now(),
+                name,
+                price,
+                batch: `B-${Date.now()}`,
+                expiry: "12/2028",
+                stock: 100
+            };
+
+            medicines.push(medicine);
+
+            const customMedicines =
+                JSON.parse(localStorage.getItem('medicines')) || [];
+
+            customMedicines.push(medicine);
+
+            localStorage.setItem(
+                'medicines',
+                JSON.stringify(customMedicines)
+            );
+
+            newMedicineName.value = '';
+            newMedicinePrice.value = '';
+
+            renderMedicineList();
+
+            alert('Medicine Added Successfully');
+        }
+
+        function renderCart() {
+            const { itemCount, subTotal, discountAmount, grandTotal, averageRate, changeAmount } = getTotals();
+            cartCountBadge.textContent = `${state.cart.length} Items`;
+            itemCountEl.textContent = itemCount;
+            distinctCountEl.textContent = state.cart.length;
+            grandTotalEl.textContent = formatCurrency(grandTotal);
+            averageRateEl.textContent = formatCurrency(averageRate);
+            subTotalEl.textContent = formatCurrency(subTotal);
+            discountSummaryEl.textContent = `Discount (${state.discountRate}%): ${formatCurrency(discountAmount)}`;
+            if (state.cashReceived > 0) {
+                changeAmountEl.textContent = changeAmount >= 0 ? `Rs ${changeAmount.toFixed(0)}` : `Due Rs ${Math.abs(changeAmount).toFixed(0)}`;
+            } else {
+                changeAmountEl.textContent = 'Rs 0';
+            }
+
+            if (!state.cart.length) {
+                cartBody.innerHTML = '<tr><td colspan="5" class="empty-state">No items added yet. Search medicine from left panel and click it to start billing.</td></tr>';
+                return;
+            }
+
+            cartBody.innerHTML = state.cart.map(item => `
         <tr>
           <td>
             <div style="font-weight:700">${item.name}</div>
@@ -857,27 +975,27 @@
         </tr>
       `).join('');
 
-      cartBody.querySelectorAll('[data-id]').forEach(input => {
-        input.addEventListener('change', event => updateQuantity(Number(event.target.dataset.id), event.target.value));
-        input.addEventListener('keydown', event => {
-          if (event.key === 'Enter') {
-            event.target.blur();
-          }
-        });
-      });
+            cartBody.querySelectorAll('[data-id]').forEach(input => {
+                input.addEventListener('change', event => updateQuantity(Number(event.target.dataset.id), event.target.value));
+                input.addEventListener('keydown', event => {
+                    if (event.key === 'Enter') {
+                        event.target.blur();
+                    }
+                });
+            });
 
-      cartBody.querySelectorAll('[data-remove]').forEach(button => {
-        button.addEventListener('click', () => removeFromCart(Number(button.dataset.remove)));
-      });
-    }
+            cartBody.querySelectorAll('[data-remove]').forEach(button => {
+                button.addEventListener('click', () => removeFromCart(Number(button.dataset.remove)));
+            });
+        }
 
-    function buildInvoiceHtml() {
-      const { subTotal, discountAmount, grandTotal, changeAmount } = getTotals();
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('en-PK', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const timeStr = now.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+        function buildInvoiceHtml() {
+            const { subTotal, discountAmount, grandTotal, changeAmount } = getTotals();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-PK', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
 
-      const rows = state.cart.map(item => `
+            const rows = state.cart.map(item => `
         <tr>
           <td>${item.name}</td>
           <td>${item.qty}</td>
@@ -886,7 +1004,7 @@
         </tr>
       `).join('');
 
-      return `
+            return `
         <div class="invoice">
           <div class="invoice-header">
             <h2>Daniyal Pharmacy</h2>
@@ -920,64 +1038,92 @@
           <div class="print-footer">Thank you for visiting. Please keep the receipt for record.</div>
         </div>
       `;
-    }
+        }
 
-    function printBill() {
-      if (!state.cart.length) {
-        alert('Cart is empty. Add medicines before printing the bill.');
-        return;
-      }
-      printArea.innerHTML = buildInvoiceHtml();
-      window.print();
-    }
+        function printBill() {
+            if (!state.cart.length) {
+                alert('Cart is empty. Add medicines before printing the bill.');
+                return;
+            }
+            printArea.innerHTML = buildInvoiceHtml();
 
-    function clearCart() {
-      if (!state.cart.length) return;
-      const confirmed = confirm('Clear the current bill?');
-      if (!confirmed) return;
-      state.cart = [];
-      state.discountRate = Number(discountSelect.value) || 0;
-      state.cashReceived = Number(cashReceivedInput.value) || 0;
-      renderCart();
-    }
+            function printBill() {
+                if (!state.cart.length) {
+                    alert('Cart is empty. Add medicines before printing the bill.');
+                    return;
+                }
 
-    discountSelect.addEventListener('change', event => {
-      state.discountRate = Number(event.target.value) || 0;
-      renderCart();
-    });
+                printArea.innerHTML = buildInvoiceHtml();
 
-    cashReceivedInput.addEventListener('input', event => {
-      state.cashReceived = Number(event.target.value) || 0;
-      renderCart();
-    });
+                const bills =
+                    JSON.parse(localStorage.getItem('billingHistory')) || [];
 
-    searchInput.addEventListener('input', event => {
-      state.query = event.target.value;
-      renderMedicineList();
-    });
+                bills.push({
+                    date: new Date().toISOString(),
+                    items: state.cart,
+                    total: getTotals().grandTotal
+                });
 
-    printBtn.addEventListener('click', printBill);
-    clearBtn.addEventListener('click', clearCart);
+                localStorage.setItem(
+                    'billingHistory',
+                    JSON.stringify(bills)
+                );
 
-    document.addEventListener('keydown', event => {
-      if (event.key === 'F2') {
-        event.preventDefault();
-        searchInput.focus();
-      }
-      if (event.key === 'F9') {
-        event.preventDefault();
-        printBill();
-      }
-      if (event.ctrlKey && event.key.toLowerCase() === 'l') {
-        event.preventDefault();
-        clearCart();
-      }
-    });
+                window.print();
+            }
+            window.print();
+        }
 
-    state.discountRate = Number(discountSelect.value) || 0;
-    state.cashReceived = Number(cashReceivedInput.value) || 0;
-    renderMedicineList();
-    renderCart();
-  </script>
+        function clearCart() {
+            if (!state.cart.length) return;
+            const confirmed = confirm('Clear the current bill?');
+            if (!confirmed) return;
+            state.cart = [];
+            state.discountRate = Number(discountSelect.value) || 0;
+            state.cashReceived = Number(cashReceivedInput.value) || 0;
+            renderCart();
+        }
+
+        discountSelect.addEventListener('change', event => {
+            state.discountRate = Number(event.target.value) || 0;
+            renderCart();
+        });
+
+        cashReceivedInput.addEventListener('input', event => {
+            state.cashReceived = Number(event.target.value) || 0;
+            renderCart();
+        });
+
+        searchInput.addEventListener('input', event => {
+            state.query = event.target.value;
+            renderMedicineList();
+        });
+
+        printBtn.addEventListener('click', printBill);
+        clearBtn.addEventListener('click', clearCart);
+
+        addMedicineBtn.addEventListener('click', addNewMedicine);
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'F2') {
+                event.preventDefault();
+                searchInput.focus();
+            }
+            if (event.key === 'F9') {
+                event.preventDefault();
+                printBill();
+            }
+            if (event.ctrlKey && event.key.toLowerCase() === 'l') {
+                event.preventDefault();
+                clearCart();
+            }
+        });
+
+        state.discountRate = Number(discountSelect.value) || 0;
+        state.cashReceived = Number(cashReceivedInput.value) || 0;
+        renderMedicineList();
+        renderCart();
+    </script>
 </body>
+
 </html>
