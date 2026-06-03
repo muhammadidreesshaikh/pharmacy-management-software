@@ -1046,31 +1046,6 @@
                 return;
             }
             printArea.innerHTML = buildInvoiceHtml();
-
-            function printBill() {
-                if (!state.cart.length) {
-                    alert('Cart is empty. Add medicines before printing the bill.');
-                    return;
-                }
-
-                printArea.innerHTML = buildInvoiceHtml();
-
-                const bills =
-                    JSON.parse(localStorage.getItem('billingHistory')) || [];
-
-                bills.push({
-                    date: new Date().toISOString(),
-                    items: state.cart,
-                    total: getTotals().grandTotal
-                });
-
-                localStorage.setItem(
-                    'billingHistory',
-                    JSON.stringify(bills)
-                );
-
-                window.print();
-            }
             window.print();
         }
 
